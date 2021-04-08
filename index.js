@@ -83,20 +83,20 @@ requestDeviceButton.onclick = async event => {
   }
 };
 
-openButton.onclick = async event => {
-  if (!device) return;
-
-  await device.open().catch(console.error);
-  console.log(`Waiting for user to press button...`);
-
-  for (let collection of device.collections) {
+loop_through_collections = async collections => {
+  for (let collection of collections) {
     // A HID collection includes usage, usage page, reports, and subcollections.
     page_log(`Usage: ${collection.usage}`);
     page_log(`Usage page: ${collection.usagePage}`);
 
     for (let inputReport of collection.inputReports) {
-      page_log(`Input report: ${inputReport.reportId}`);
+      let list = list_log(`Input report: ${inputReport.reportId}`);
       // Loop through inputReport.items
+      for (let item of inputReport.items) {
+        for (const [key, value] of Object.entries(item)) {
+          list_item(`${key}: ${value}`, list);
+        }
+      }
     }
 
     for (let outputReport of collection.outputReports) {
@@ -115,37 +115,44 @@ openButton.onclick = async event => {
     }
 
     // Loop through subcollections with collection.children
+    loop_through_collections(collection.children);
   }
+}
+
+openButton.onclick = async event => {
+  if (!device) return;
+
+  await device.open().catch(console.error);
+  console.log(`Waiting for user to press button...`);
+
+loop_through_collections(device.collections);
 
   device.addEventListener("inputreport", event => {
     const { data, device, reportId } = event;
 
-    // Handle only the Joy-Con Right device and a specific report ID.
-    // if (device.productId != 0x2007 && reportId != 0x3f) return;
+    
 
-    const value_1 = data.getUint8(0);
-    const value_2 = data.getUint8(1);
-    const value_3 = data.getUint8(2);
-    const value_4 = data.getUint8(3);
-    const value_5 = data.getUint8(4);
-    const value_6 = data.getUint8(5);
-    const value_7 = data.getUint8(6);
-    const value_8 = data.getUint8(7);
-    const value_9 = data.getUint8(8);
-    // if (value == 0) return;
+    // const value_1 = data.getUint8(0);
+    // const value_2 = data.getUint8(1);
+    // const value_3 = data.getUint8(2);
+    // const value_4 = data.getUint8(3);
+    // const value_5 = data.getUint8(4);
+    // const value_6 = data.getUint8(5);
+    // const value_7 = data.getUint8(6);
+    // const value_8 = data.getUint8(7);
+    // const value_9 = data.getUint8(8);
 
-    // const someButtons = { 1: "A", 2: "X", 4: "B", 8: "Y" };
-    console.log(data);
-    // console.log("data: " + value + " id: " + reportId );
-    console.log(' : ' + value_1
-      + ' : ' + value_2 
-      + ' : ' + value_3 
-      + ' : ' + value_4 
-      + ' : ' + value_5 
-      + ' pressure: ' + value_6
-      + ' : ' + value_7 
-      + ' : ' + value_8 
-      + ' : ' + value_9
-    )
+    // console.log(data);
+
+    // console.log(' : ' + value_1
+    //   + ' : ' + value_2 
+    //   + ' : ' + value_3 
+    //   + ' : ' + value_4 
+    //   + ' : ' + value_5 
+    //   + ' pressure: ' + value_6
+    //   + ' : ' + value_7 
+    //   + ' : ' + value_8 
+    //   + ' : ' + value_9
+    // )
   });
 };
