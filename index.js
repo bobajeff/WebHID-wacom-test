@@ -2,7 +2,33 @@ import('./pkg')
   .catch(console.error);
 
 page_log = text => {
-  log.innerHTML += `<p>${text}\r\n</p>`;
+  // log.innerHTML += `<p>${text}\r\n</p>`;
+  let p = document.createElement("p");
+  p.textContent = text;
+  log.appendChild(p);
+};
+
+list_log = text => {
+  let li = document.createElement("p");
+  let span = document.createElement("span");
+  span.textContent = text;
+  span.className = "caret";
+  span.addEventListener("click", function() {
+    this.parentElement.querySelector(".nested").classList.toggle("active");
+    this.classList.toggle("caret-down");
+  });
+  li.appendChild(span);
+  let ul = document.createElement("ul");
+  ul.className = "nested";
+  li.appendChild(ul);
+  log.appendChild(li);
+  return ul;
+};
+
+list_item = (text,elm) => {
+  let li = document.createElement("li");
+  li.textContent = text;
+  elm.appendChild(li);
 };
 
 let device;
@@ -79,8 +105,13 @@ openButton.onclick = async event => {
     }
 
     for (let featureReport of collection.featureReports) {
-      page_log(`Feature report: ${featureReport.reportId}`);
+      let list = list_log(`Feature report: ${featureReport.reportId}`);
       // Loop through featureReport.items
+      for (let item of featureReport.items) {
+        for (const [key, value] of Object.entries(item)) {
+          list_item(`${key}: ${value}`, list);
+        }
+      }
     }
 
     // Loop through subcollections with collection.children
