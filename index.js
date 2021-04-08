@@ -8,29 +8,6 @@ page_log = text => {
   log.appendChild(p);
 };
 
-list_log = text => {
-  let li = document.createElement("p");
-  let span = document.createElement("span");
-  span.textContent = text;
-  span.className = "caret";
-  span.addEventListener("click", function() {
-    this.parentElement.querySelector(".nested").classList.toggle("active");
-    this.classList.toggle("caret-down");
-  });
-  li.appendChild(span);
-  let ul = document.createElement("ul");
-  ul.className = "nested";
-  li.appendChild(ul);
-  log.appendChild(li);
-  return ul;
-};
-
-list_item = (text,elm) => {
-  let li = document.createElement("li");
-  li.textContent = text;
-  elm.appendChild(li);
-};
-
 let device;
 
 if (!("hid" in navigator)) {
@@ -41,6 +18,9 @@ navigator.hid.getDevices().then(devices => {
   if (devices.length == 0) {
     page_log(`No HID devices selected. Press the "request device" button.`);
     return;
+  }
+  if (devices.length > 1) {
+    page_log(`You have multiple devices.`);
   }
   device = devices[0];
   page_log(`User previously selected "${device.productName}" HID device.`);
@@ -83,41 +63,6 @@ requestDeviceButton.onclick = async event => {
   }
 };
 
-loop_through_collections = async collections => {
-  for (let collection of collections) {
-    // A HID collection includes usage, usage page, reports, and subcollections.
-    page_log(`Usage: ${collection.usage}`);
-    page_log(`Usage page: ${collection.usagePage}`);
-
-    for (let inputReport of collection.inputReports) {
-      let list = list_log(`Input report: ${inputReport.reportId}`);
-      // Loop through inputReport.items
-      for (let item of inputReport.items) {
-        for (const [key, value] of Object.entries(item)) {
-          list_item(`${key}: ${value}`, list);
-        }
-      }
-    }
-
-    for (let outputReport of collection.outputReports) {
-      page_log(`Output report: ${outputReport.reportId}`);
-      // Loop through outputReport.items
-    }
-
-    for (let featureReport of collection.featureReports) {
-      let list = list_log(`Feature report: ${featureReport.reportId}`);
-      // Loop through featureReport.items
-      for (let item of featureReport.items) {
-        for (const [key, value] of Object.entries(item)) {
-          list_item(`${key}: ${value}`, list);
-        }
-      }
-    }
-
-    // Loop through subcollections with collection.children
-    loop_through_collections(collection.children);
-  }
-}
 
 openButton.onclick = async event => {
   if (!device) return;
@@ -125,34 +70,12 @@ openButton.onclick = async event => {
   await device.open().catch(console.error);
   console.log(`Waiting for user to press button...`);
 
-loop_through_collections(device.collections);
-
   device.addEventListener("inputreport", event => {
     const { data, device, reportId } = event;
 
-    
-
-    // const value_1 = data.getUint8(0);
-    // const value_2 = data.getUint8(1);
-    // const value_3 = data.getUint8(2);
-    // const value_4 = data.getUint8(3);
-    // const value_5 = data.getUint8(4);
-    // const value_6 = data.getUint8(5);
-    // const value_7 = data.getUint8(6);
-    // const value_8 = data.getUint8(7);
-    // const value_9 = data.getUint8(8);
-
-    // console.log(data);
-
-    // console.log(' : ' + value_1
-    //   + ' : ' + value_2 
-    //   + ' : ' + value_3 
-    //   + ' : ' + value_4 
-    //   + ' : ' + value_5 
-    //   + ' pressure: ' + value_6
-    //   + ' : ' + value_7 
-    //   + ' : ' + value_8 
-    //   + ' : ' + value_9
-    // )
+    let buffArray = new Uint8Array(data.buffer);
+    console.log(buffArray);
+    console.log(device);
+  
   });
 };
