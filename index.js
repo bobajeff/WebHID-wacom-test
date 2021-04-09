@@ -65,12 +65,13 @@ openButton.onclick = async event => {
   await device.open().catch(console.error);
   page_log(`Waiting for user to press button...`);
 
+  console.log(device);
+
   device.addEventListener("inputreport", event => {
     const { data, device, reportId } = event;
 
     let buffArray = new Uint8Array(data.buffer);
     console.log(buffArray);
-    // console.log(device);
   
   });
 };
