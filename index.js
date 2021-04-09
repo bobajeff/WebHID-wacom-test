@@ -2,7 +2,6 @@ import('./pkg')
   .catch(console.error);
 
 page_log = text => {
-  // log.innerHTML += `<p>${text}\r\n</p>`;
   let p = document.createElement("p");
   p.textContent = text;
   log.appendChild(p);
@@ -28,10 +27,6 @@ navigator.hid.getDevices().then(devices => {
 });
 
 requestDeviceButton.onclick = async event => {
-  // if (window.self !== window.top) {
-  //   window.open(location.href, "", "noopener,noreferrer");
-  //   return;
-  // }
   document.body.style.display = "none";
   try {
     const filters = [
@@ -68,14 +63,14 @@ openButton.onclick = async event => {
   if (!device) return;
 
   await device.open().catch(console.error);
-  console.log(`Waiting for user to press button...`);
+  page_log(`Waiting for user to press button...`);
 
   device.addEventListener("inputreport", event => {
     const { data, device, reportId } = event;
 
     let buffArray = new Uint8Array(data.buffer);
     console.log(buffArray);
-    console.log(device);
+    // console.log(device);
   
   });
 };
